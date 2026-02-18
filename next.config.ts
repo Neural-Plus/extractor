@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    "sharp",
+    "pdfjs-serverless",
+    "exceljs",
+    "jszip",
+    "mammoth",
+    "tesseract.js",
+  ],
 };
 
 export default nextConfig;
