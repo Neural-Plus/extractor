@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────
 interface ContentChunk {
@@ -75,6 +75,60 @@ const SUPPORTED_FORMATS = [
     "PNG",
     "JPG",
 ];
+
+// ─── Export Helpers ───────────────────────────────────────────────────
+function downloadFile(content: string, fileName: string, mimeType: string) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function resultsToJson(docs: ExtractedDocument[]): string {
+    return JSON.stringify(docs, null, 2);
+}
+
+function resultsToText(docs: ExtractedDocument[]): string {
+    return docs
+        .map((doc) => {
+            const header = `===== ${doc.fileName} =====`;
+            const chunks = doc.chunks
+                .map((c) => {
+                    const prefix = c.page ? `[Page ${c.page}] ` : "";
+                    return `${prefix}${c.text}`;
+                })
+                .join("\n\n");
+            return `${header}\n\n${chunks}`;
+        })
+        .join("\n\n\n");
+}
+
+function resultsToMarkdown(docs: ExtractedDocument[]): string {
+    return docs
+        .map((doc) => {
+            const header = `# ${doc.fileName}\n\n> MIME: \`${doc.mimeType}\` | ID: \`${doc.documentId}\``;
+            const meta = Object.entries(doc.metadata)
+                .map(([k, v]) => `- **${k}**: ${typeof v === "object" ? JSON.stringify(v) : String(v)}`)
+                .join("\n");
+            const chunks = doc.chunks
+                .map((c) => {
+                    const badge = c.page ? ` *(Page ${c.page})*` : "";
+                    if (c.type === "heading") return `## ${c.text}${badge}`;
+                    if (c.type === "table") return `${badge}\n\n${c.text}`;
+                    if (c.type === "list") return `${badge}\n\n${c.text}`;
+                    return `${c.text}${badge}`;
+                })
+                .join("\n\n");
+            const metaBlock = meta ? `\n\n### Metadata\n\n${meta}` : "";
+            return `${header}${metaBlock}\n\n---\n\n${chunks}`;
+        })
+        .join("\n\n---\n\n");
+}
 
 // ─── Component ────────────────────────────────────────────────────────
 export default function ExtractorUI() {
@@ -195,6 +249,35 @@ export default function ExtractorUI() {
 
     const successCount = results.filter((r) => r.success).length;
     const errorCount = results.filter((r) => !r.success).length;
+
+    const successDocs = useMemo(
+        () =>
+            results
+                .filter((r): r is Extract<ExtractionResult, { success: true }> => r.success)
+                .map((r) => r.document),
+        [results]
+    );
+
+    const handleExport = useCallback(
+        (format: "json" | "txt" | "md") => {
+            if (successDocs.length === 0) return;
+            const baseName = successDocs.length === 1
+                ? successDocs[0].fileName.replace(/\.[^.]+$/, "")
+                : "nural-extraction";
+            switch (format) {
+                case "json":
+                    downloadFile(resultsToJson(successDocs), `${baseName}.json`, "application/json");
+                    break;
+                case "txt":
+                    downloadFile(resultsToText(successDocs), `${baseName}.txt`, "text/plain");
+                    break;
+                case "md":
+                    downloadFile(resultsToMarkdown(successDocs), `${baseName}.md`, "text/markdown");
+                    break;
+            }
+        },
+        [successDocs]
+    );
 
     return (
         <div className="app-container">
@@ -317,6 +400,21 @@ export default function ExtractorUI() {
                             )}
                         </div>
                     </div>
+
+                    {successDocs.length > 0 && (
+                        <div className="export-bar">
+                            <span className="export-label">Export as:</span>
+                            <button className="btn-export" onClick={() => handleExport("json")}>
+                                <span className="export-icon">{ }</span> JSON
+                            </button>
+                            <button className="btn-export" onClick={() => handleExport("txt")}>
+                                <span className="export-icon">📝</span> Text
+                            </button>
+                            <button className="btn-export" onClick={() => handleExport("md")}>
+                                <span className="export-icon">#</span> Markdown
+                            </button>
+                        </div>
+                    )}
 
                     {results.map((result, i) => (
                         <div key={i} className="result-card">
