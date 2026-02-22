@@ -14,8 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nural+ Extractor",
+  title: "Neural+ Extractor",
   description: "Document ingestion & extraction system for AI pipelines",
+  icons: {
+    icon: "/neural+_inspiration-removebg-preview.png",
+    apple: "/neural+_inspiration-removebg-preview.png",
+  },
 };
 
 export default function RootLayout({
