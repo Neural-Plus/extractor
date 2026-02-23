@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## PDF OCR configuration
+
+PDF parsing now relies on `pdf-lib` for structural extraction and OpenAI Vision for OCR fallbacks. Set `OPENAI_API_KEY` in your environment (or `.env.local`) so the `OpenAIVisionOcrProvider` can call the OpenAI Responses API. Without this key, PDFs that require OCR will fail to process.
+
 ## Getting Started
 
 First, run the development server:

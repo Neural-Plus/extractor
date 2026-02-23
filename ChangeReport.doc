@@ -1,0 +1,37 @@
+Nural+ Extractor Change Report
+================================
+
+Scope
+-----
+Comparison between the updated `extractor1` workspace and the previous `extractor` version, focusing on PDF extraction and shared schema changes.
+
+1. Dependency Updates
+---------------------
+• Replaced `pdfjs-serverless` with a local toolchain that includes `pdf-lib`, `pdf-parse`, and `openai` for hybrid text/OCR extraction.
+• Retained OCR dependencies (`tesseract.js`, `sharp`, `uuid`) and existing Next.js tooling; scripts remain `dev`, `build`, `start`, `lint`.
+• `extractor1/package.json` now lists: csv-parse, exceljs, gray-matter, jszip, mammoth, next, openai, pdf-lib, pdf-parse, react, react-dom, sharp, tesseract.js, uuid.
+
+2. Shared Schema Adjustment
+---------------------------
+File: src/lib/nural-extractor/types.ts
+• `ChunkType` union expanded to include `"image"` so OCR-derived content can be labeled separately from headings, paragraphs, tables, and lists.
+
+3. PDF Extractor Overhaul
+-------------------------
+File: src/lib/nural-extractor/extractors/pdf.ts
+• Added pdf.js text extraction via `pdf-parse`; each page is processed, normalized, and chunked before fallback to the legacy stream decoder.
+• Image streams are converted with `sharp` and passed to an OCR provider. OpenAI Vision OCR is attempted when `OPENAI_API_KEY` is set; otherwise a Tesseract-based provider runs, ensuring OCR is always available.
+• OCR snippets are emitted as `image` chunks with page numbers and `section` metadata (`image-1`, `image-2`, ...). Metadata now tracks `imageOcrPages` for observability.
+• Legacy literal/hex text parsing remains as a safety net when pdf.js cannot read a page.
+
+4. TypeScript Support
+---------------------
+File: src/types/pdf-parse.d.ts
+• Added lightweight module declarations for `pdf-parse` so the strict TS config (paths, isolatedModules, etc.) compiles without third-party typings.
+
+5. Operational Notes
+--------------------
+• To test locally, run `npm install` then `npm run dev` in `extractor1`, upload PDFs that mix text layers and scanned images, and verify both paragraph/heading chunks and `image` chunks appear in API responses (`POST /api/nural/extract`).
+• Set `OPENAI_API_KEY` if you want high-quality OCR; otherwise, the system automatically falls back to Tesseract.
+
+End of Report

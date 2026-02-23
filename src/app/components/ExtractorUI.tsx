@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useRef, useCallback, useMemo } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────
@@ -283,11 +284,11 @@ export default function ExtractorUI() {
         <>
             {/* ── Top Nav with Logo ── */}
             <nav className="extractor-nav">
-                <a href="/" className="landing-logo">
+                <Link href="/" className="landing-logo">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/neural+_inspiration-removebg-preview.png" alt="Neural+" width={48} height={48} className="landing-logo-img" />
                     <span className="landing-logo-text">Neural+</span>
-                </a>
+                </Link>
             </nav>
 
             <div className="app-container">

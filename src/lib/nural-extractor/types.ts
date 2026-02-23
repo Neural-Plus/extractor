@@ -11,7 +11,7 @@
 // ---------------------------------------------------------------------------
 
 /** Semantic type of a content chunk */
-export type ChunkType = "heading" | "paragraph" | "table" | "list";
+export type ChunkType = "heading" | "paragraph" | "table" | "list" | "image";
 
 /** A single unit of extracted content */
 export interface ContentChunk {

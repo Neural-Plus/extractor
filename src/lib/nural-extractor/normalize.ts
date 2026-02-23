@@ -58,7 +58,7 @@ export function normalizeChunks(chunks: ContentChunk[]): ContentChunk[] {
             text: normalizeText(chunk.text),
         }))
         .filter((chunk) => chunk.text.length > 0)
-        .map((chunk, _index) => ({
+        .map((chunk) => ({
             ...chunk,
             id: uuidv4(),
         }));
