@@ -31,7 +31,7 @@ export default function Home() {
       <section className="landing-hero">
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-          AI-Powered Document Intelligence
+          NEURAL+ EXTRACTION ENGINE v2.4
         </div>
 
         <h1 className="hero-title">
