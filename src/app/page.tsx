@@ -164,7 +164,7 @@ export default function Home() {
       {/* ── Footer ── */}
       <footer className="landing-footer">
         <p>
-          Built with Next.js · Powered by Nural+ Extractor Engine
+          Powered by Nural+ Extractor Engine
         </p>
       </footer>
     </div>
