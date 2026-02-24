@@ -374,12 +374,12 @@ export default function ExtractorUI() {
                 <header className="header">
                     <div className="header-badge">
                         <span className="header-badge-dot" />
-                        Neural+ Extractor
+                        NEURAL+ EXTRACTION ENGINE v2.4
                     </div>
-                    <h1>Document Extraction</h1>
+                    <h1>Document <span className="header-gradient">Extraction</span><br />for AI Pipelines</h1>
                     <p>
-                        Upload documents and extract structured, normalized content ready for
-                        LLM processing and AI pipelines.
+                        Transform raw documents into structured, LLM-ready data. Supports
+                        native text, scanned PDFs, and image OCR — all in one pipeline.
                     </p>
                 </header>
 
