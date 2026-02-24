@@ -15,6 +15,7 @@
     "jszip": "^3.10.1",
     "mammoth": "^1.11.0",
     "next": "16.1.6",
+    "pdfjs-dist": "^5.4.624",
     "pdfjs-serverless": "^1.1.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useMemo } from "react";
+import type { OcrProgress } from "@/lib/nural-extractor/pdf-ocr-client";
 
 // ─── Types ────────────────────────────────────────────────────────────
 interface ContentChunk {
@@ -137,6 +138,8 @@ export default function ExtractorUI() {
     const [loading, setLoading] = useState(false);
     const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
     const [dragActive, setDragActive] = useState(false);
+    const [ocrProgress, setOcrProgress] = useState<OcrProgress | null>(null);
+    const [ocrRunning, setOcrRunning] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     // ── File handling ──
@@ -195,6 +198,8 @@ export default function ExtractorUI() {
         setLoading(true);
         setResults([]);
         setExpandedCards(new Set());
+        setOcrProgress(null);
+        setOcrRunning(false);
 
         try {
             const formData = new FormData();
@@ -208,13 +213,86 @@ export default function ExtractorUI() {
             const data = await res.json();
 
             if (data.results) {
-                setResults(data.results);
+                let serverResults: ExtractionResult[] = data.results;
+                setResults(serverResults);
+
                 // Auto-expand first successful result
-                const firstSuccess = data.results.findIndex(
+                const firstSuccess = serverResults.findIndex(
                     (r: ExtractionResult) => r.success
                 );
                 if (firstSuccess >= 0) {
                     setExpandedCards(new Set([firstSuccess]));
+                }
+
+                // ── Client-side OCR for scanned / sparse PDF pages ──
+                const pdfResultsNeedingOcr = serverResults
+                    .map((r, idx) => ({ r, idx }))
+                    .filter(
+                        ({ r }) =>
+                            r.success &&
+                            r.document.mimeType === "application/pdf" &&
+                            Array.isArray(r.document.metadata.ocrPages) &&
+                            (r.document.metadata.ocrPages as number[]).length > 0
+                    );
+
+                if (pdfResultsNeedingOcr.length > 0) {
+                    setOcrRunning(true);
+                    setLoading(false); // Release the main loading so results are visible
+
+                    // Dynamic import to keep the module client-only
+                    const { ocrPdfPages } = await import(
+                        "@/lib/nural-extractor/pdf-ocr-client"
+                    );
+
+                    for (const { r, idx } of pdfResultsNeedingOcr) {
+                        if (!r.success) continue;
+                        const ocrPages = r.document.metadata.ocrPages as number[];
+                        const matchingFile = files.find(
+                            (f) => f.name === r.document.fileName
+                        );
+                        if (!matchingFile) continue;
+
+                        try {
+                            const ocrChunks = await ocrPdfPages(
+                                matchingFile,
+                                ocrPages,
+                                (progress) => setOcrProgress(progress)
+                            );
+
+                            if (ocrChunks.length > 0) {
+                                // Merge OCR chunks into the result
+                                serverResults = serverResults.map((sr, si) => {
+                                    if (si !== idx || !sr.success) return sr;
+                                    return {
+                                        ...sr,
+                                        document: {
+                                            ...sr.document,
+                                            chunks: [
+                                                ...sr.document.chunks,
+                                                ...ocrChunks.map((oc) => ({
+                                                    id: `ocr-${oc.page}-${Date.now()}`,
+                                                    type: oc.type as "paragraph",
+                                                    text: oc.text,
+                                                    page: oc.page,
+                                                    section: "OCR",
+                                                })),
+                                            ].sort((a, b) => (a.page ?? 0) - (b.page ?? 0)),
+                                            metadata: {
+                                                ...sr.document.metadata,
+                                                ocrCompleted: true,
+                                            },
+                                        },
+                                    };
+                                });
+                                setResults(serverResults);
+                            }
+                        } catch (ocrErr) {
+                            console.error("[ExtractorUI] Client-side OCR failed:", ocrErr);
+                        }
+                    }
+
+                    setOcrRunning(false);
+                    return; // We already set loading false above
                 }
             } else if (data.error) {
                 setResults([
@@ -235,6 +313,7 @@ export default function ExtractorUI() {
             ]);
         } finally {
             setLoading(false);
+            setOcrRunning(false);
         }
     }, [files]);
 
@@ -392,6 +471,40 @@ export default function ExtractorUI() {
                     </div>
                 )}
 
+                {/* ── OCR Progress Loader ── */}
+                {ocrRunning && ocrProgress && (
+                    <div className="ocr-progress-card">
+                        <div className="ocr-progress-header">
+                            <div className={`ocr-scan-icon ${ocrProgress.percent >= 100 ? "done" : ""}`}>
+                                🔍
+                            </div>
+                            <div>
+                                <div className="ocr-progress-title">
+                                    {ocrProgress.percent >= 100
+                                        ? "OCR Complete"
+                                        : "Scanning Scanned Pages…"}
+                                </div>
+                                <div className="ocr-progress-subtitle">
+                                    Page {ocrProgress.currentPage} of {ocrProgress.totalPages}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="ocr-bar-container">
+                            <div
+                                className={`ocr-bar-fill ${ocrProgress.percent >= 100 ? "done" : ""}`}
+                                style={{ width: `${ocrProgress.percent}%` }}
+                            />
+                        </div>
+                        <div className="ocr-status-row">
+                            <span className="ocr-status-text">
+                                <span className={`ocr-status-dot ${ocrProgress.percent >= 100 ? "done" : ""}`} />
+                                {ocrProgress.status}
+                            </span>
+                            <span className="ocr-percent">{ocrProgress.percent}%</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* ── Results ── */}
                 {results.length > 0 && (
                     <div className="results-section">
@@ -500,7 +613,12 @@ export default function ExtractorUI() {
                                                                         Page {chunk.page}
                                                                     </span>
                                                                 )}
-                                                                {chunk.section && (
+                                                                {chunk.section === "OCR" && (
+                                                                    <span className="chunk-ocr-badge">
+                                                                        OCR
+                                                                    </span>
+                                                                )}
+                                                                {chunk.section && chunk.section !== "OCR" && (
                                                                     <span className="chunk-page">
                                                                         {chunk.section}
                                                                     </span>
