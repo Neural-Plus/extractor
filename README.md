@@ -13,6 +13,15 @@ OPENAI_MODEL=gpt-4o-mini
 
 The chat UI sends requests to `/api/chat/ask`, and the server route calls the configured model.
 
+### Free testing quick start
+
+You can test with an OpenAI-compatible free-tier provider:
+
+- OpenRouter: set `OPENAI_BASE_URL=https://openrouter.ai/api/v1` and use a free model (example in `.env.local`).
+- Groq: set `OPENAI_BASE_URL=https://api.groq.com/openai/v1` and use a Groq model.
+
+Then restart the dev server after changing env vars.
+
 ## Getting Started
 
 First, run the development server:
