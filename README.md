@@ -1,8 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## PDF OCR configuration
+## LLM Chat Setup
 
-PDF parsing now relies on `pdf-lib` for structural extraction and OpenAI Vision for OCR fallbacks. Set `OPENAI_API_KEY` in your environment (or `.env.local`) so the `OpenAIVisionOcrProvider` can call the OpenAI Responses API. Without this key, PDFs that require OCR will fail to process.
+To enable the chat page with a real LLM, add a `.env.local` file in the project root:
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-4o-mini
+# Optional (for OpenAI-compatible providers)
+# OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+The chat UI sends requests to `/api/chat/ask`, and the server route calls the configured model.
 
 ## Getting Started
 

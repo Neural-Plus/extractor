@@ -17,6 +17,9 @@ export default function Home() {
             <span className="landing-logo-text">Neural+</span>
           </div>
           <div className="nav-links">
+            <Link href="/chat" className="nav-link">
+              Chat
+            </Link>
             <Link href="/contact" className="nav-link">
               Contact
             </Link>
@@ -31,7 +34,7 @@ export default function Home() {
       <section className="landing-hero">
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-          AI-Powered Document Intelligence
+          NEURAL+ EXTRACTION ENGINE v2.4
         </div>
 
         <h1 className="hero-title">
@@ -50,6 +53,9 @@ export default function Home() {
           <Link href="/extract" className="hero-btn-primary">
             <span className="hero-btn-icon">🚀</span>
             Start Extracting
+          </Link>
+          <Link href="/chat" className="hero-btn-secondary">
+            Open Chat Context
           </Link>
           <a href="#features" className="hero-btn-secondary">
             See How It Works
@@ -164,7 +170,7 @@ export default function Home() {
       {/* ── Footer ── */}
       <footer className="landing-footer">
         <p>
-          Built with Next.js · Powered by Nural+ Extractor Engine
+          Powered by Nural+ Extractor Engine
         </p>
       </footer>
     </div>
