@@ -78,9 +78,14 @@ export default function ContactPage() {
                         <img src="/neural+_inspiration-removebg-preview.png" alt="Neural+" width={36} height={36} className="landing-logo-img" />
                         <span className="landing-logo-text">Neural+</span>
                     </Link>
-                    <Link href="/extract" className="nav-cta">
-                        Launch App →
-                    </Link>
+                    <div className="nav-links">
+                        <Link href="/docs" className="nav-link">
+                            API Docs
+                        </Link>
+                        <Link href="/extract" className="nav-cta">
+                            Launch App →
+                        </Link>
+                    </div>
                 </div>
             </nav>
 

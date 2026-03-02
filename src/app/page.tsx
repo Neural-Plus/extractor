@@ -17,6 +17,9 @@ export default function Home() {
             <span className="landing-logo-text">Neural+</span>
           </div>
           <div className="nav-links">
+            <Link href="/docs" className="nav-link">
+              API Docs
+            </Link>
             <Link href="/contact" className="nav-link">
               Contact
             </Link>

@@ -67,7 +67,7 @@ Every document (regardless of source format) returns:
 Upload one or more files:
 
 ```bash
-curl -X POST http://localhost:3000/api/nural/extract \
+curl -X POST https://neural-extractor.onrender.com/api/nural/extract \
   -F "files=@report.pdf" \
   -F "files=@data.xlsx"
 ```
