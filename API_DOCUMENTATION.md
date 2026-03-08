@@ -7,7 +7,7 @@
 
 ## Overview
 
-The Nural+ Extractor API converts documents into clean, structured JSON. Upload any supported file and receive normalized text content organized into semantic chunks (headings, paragraphs, tables, lists) — ready for LLM pipelines, search indexing, or downstream processing.
+The Nural+ Extractor API converts documents into clean, structured content. Upload any supported file and receive normalized extraction output as `JSON`, `plain text`, or `Markdown`, ready for LLM pipelines, search indexing, or downstream processing.
 
 ---
 
@@ -23,7 +23,7 @@ The Nural+ Extractor API converts documents into clean, structured JSON. Upload 
 
 ## POST `/api/v1/extract`
 
-Upload one or more files and receive structured extraction results as JSON.
+Upload one or more files and receive structured extraction results.
 
 ### Request
 
@@ -34,6 +34,13 @@ Upload one or more files and receive structured extraction results as JSON.
 | Form Field | Type   | Description                        | Required |
 |------------|--------|------------------------------------|----------|
 | `files`    | File(s)| One or more files to extract from  | Yes      |
+| `format`   | String | Output format: `json`, `txt`, `md` | No (default: `json`) |
+
+You can also set the output format via query parameter:
+
+- `?format=json`
+- `?format=txt`
+- `?format=md` (or `markdown`)
 
 ### Limits
 
@@ -59,6 +66,21 @@ curl -X POST https://neural-extractor.onrender.com/api/v1/extract \
   -F "files=@report.pdf" \
   -F "files=@data.xlsx" \
   -F "files=@notes.docx"
+```
+
+**Markdown output:**
+
+```bash
+curl -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=md" \
+  -F "files=@report.pdf"
+```
+
+**Text output (form field):**
+
+```bash
+curl -X POST https://neural-extractor.onrender.com/api/v1/extract \
+  -F "files=@report.pdf" \
+  -F "format=txt"
 ```
 
 **Save output to file:**
@@ -103,7 +125,7 @@ print(response.json())
 
 ## Response Format
 
-### Success Response (200)
+### Success Response (200, `format=json`)
 
 ```json
 {
@@ -191,6 +213,7 @@ When some files succeed and others fail, you still get a `200` with per-file sta
 | Status | Condition                              | Body                                              |
 |--------|----------------------------------------|----------------------------------------------------|
 | `400`  | No files in request                    | `{ "apiVersion": "v1", "error": "No files provided..." }` |
+| `400`  | Invalid `format` value                 | `{ "apiVersion": "v1", "error": "Invalid output format..." }` |
 | `415`  | Wrong content type (not multipart)     | `{ "apiVersion": "v1", "error": "Invalid content type..." }` |
 | `500`  | Unhandled server error                 | `{ "apiVersion": "v1", "error": "..." }`           |
 
@@ -273,7 +296,13 @@ Returns endpoint metadata, supported formats, and a usage example. Useful for se
   "method": "POST",
   "contentType": "multipart/form-data",
   "fieldName": "files",
-  "description": "Upload one or more files to extract structured text content as JSON.",
+  "description": "Upload one or more files to extract structured text content.",
+  "outputFormats": ["json", "txt", "md"],
+  "formatSelection": {
+    "query": "?format=json|txt|md",
+    "formField": "format=json|txt|md",
+    "default": "json"
+  },
   "limits": {
     "maxFileSize": "50 MB",
     "maxDuration": "60 seconds"

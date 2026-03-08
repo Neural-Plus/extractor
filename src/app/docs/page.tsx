@@ -67,6 +67,7 @@ const CHUNK_FIELDS = [
 const ERROR_CODES = [
     { status: "200", condition: "Success (even partial)", description: "All or some files extracted. Check results[i].success per file." },
     { status: "400", condition: "No files provided", description: "Request had no files in the 'files' form field." },
+    { status: "400", condition: "Invalid output format", description: "Use one of: json, txt, md (or markdown)." },
     { status: "415", condition: "Wrong content type", description: "Expected multipart/form-data." },
     { status: "500", condition: "Server error", description: "Unhandled internal error." },
 ];
@@ -79,10 +80,12 @@ export default function ApiDocsPage() {
         { id: "overview", label: "Overview" },
         { id: "endpoint", label: "Endpoint" },
         { id: "request", label: "Request" },
+        { id: "output-formats", label: "Output Formats" },
         { id: "response", label: "Response" },
         { id: "schema", label: "Schema" },
         { id: "formats", label: "Formats" },
         { id: "examples", label: "Examples" },
+        { id: "local-testing", label: "Local Testing" },
         { id: "errors", label: "Errors" },
     ];
 
@@ -288,9 +291,69 @@ export default function ApiDocsPage() {
                                         <td>File(s)</td>
                                         <td>One or more files to extract. Use the same field name for batch uploads.</td>
                                     </tr>
+                                    <tr>
+                                        <td><code>format</code></td>
+                                        <td>String</td>
+                                        <td>Optional output format: <code>json</code>, <code>txt</code>, <code>md</code> (also accepts <code>markdown</code>). Default: <code>json</code>.</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
+                    </section>
+
+                    {/* Output Formats */}
+                    <section id="output-formats" className="docs-section">
+                        <h2 className="docs-heading">Output Formats</h2>
+                        <p className="docs-text">
+                            The extraction endpoint supports three output formats using either query string
+                            (<code>?format=...</code>) or a form field named <code>format</code>.
+                        </p>
+
+                        <div className="docs-table-wrap">
+                            <table className="docs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Format</th>
+                                        <th>Value</th>
+                                        <th>Response Content-Type</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>JSON</td>
+                                        <td><code>json</code></td>
+                                        <td><code>application/json</code></td>
+                                        <td>Default if omitted.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Text</td>
+                                        <td><code>txt</code> or <code>text</code></td>
+                                        <td><code>text/plain; charset=utf-8</code></td>
+                                        <td>Human-readable plain text output.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Markdown</td>
+                                        <td><code>md</code> or <code>markdown</code></td>
+                                        <td><code>text/markdown; charset=utf-8</code></td>
+                                        <td>Structured Markdown for docs/LLM workflows.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 className="docs-subheading">Examples</h3>
+                        <CodeBlock
+                            language="bash"
+                            code={`curl -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=md" \\
+  -F "files=@report.pdf"`}
+                        />
+                        <CodeBlock
+                            language="bash"
+                            code={`curl -X POST https://neural-extractor.onrender.com/api/v1/extract \\
+  -F "files=@report.pdf" \\
+  -F "format=txt"`}
+                        />
                     </section>
 
                     {/* Response */}
@@ -501,6 +564,37 @@ print(response.json())`}
                         </p>
                     </section>
 
+                    {/* Local Testing */}
+                    <section id="local-testing" className="docs-section">
+                        <h2 className="docs-heading">Local Testing</h2>
+
+                        <h3 className="docs-subheading">Start Locally</h3>
+                        <CodeBlock
+                            language="bash"
+                            code={`npm install
+npm run dev`}
+                        />
+                        <p className="docs-text" style={{ marginTop: 12 }}>
+                            Local base URL: <code>http://localhost:3000</code>
+                        </p>
+
+                        <h3 className="docs-subheading">PowerShell cURL Tests</h3>
+                        <CodeBlock
+                            language="powershell"
+                            code={`curl.exe -X POST "http://localhost:3000/api/v1/extract" -F "files=@C:\\path\\to\\file.pdf"
+curl.exe -X POST "http://localhost:3000/api/v1/extract?format=txt" -F "files=@C:\\path\\to\\file.pdf"
+curl.exe -X POST "http://localhost:3000/api/v1/extract?format=md" -F "files=@C:\\path\\to\\file.pdf"`}
+                        />
+
+                        <h3 className="docs-subheading">Save Output to Local Files</h3>
+                        <CodeBlock
+                            language="powershell"
+                            code={`curl.exe -X POST "http://localhost:3000/api/v1/extract?format=json" -F "files=@C:\\path\\to\\file.pdf" -o result.json
+curl.exe -X POST "http://localhost:3000/api/v1/extract?format=txt" -F "files=@C:\\path\\to\\file.pdf" -o result.txt
+curl.exe -X POST "http://localhost:3000/api/v1/extract?format=md" -F "files=@C:\\path\\to\\file.pdf" -o result.md`}
+                        />
+                    </section>
+
                     {/* Errors */}
                     <section id="errors" className="docs-section">
                         <h2 className="docs-heading">Error Handling</h2>
@@ -515,7 +609,7 @@ print(response.json())`}
                                 </thead>
                                 <tbody>
                                     {ERROR_CODES.map((e) => (
-                                        <tr key={e.status}>
+                                        <tr key={`${e.status}-${e.condition}`}>
                                             <td><span className={`docs-status-badge status-${e.status}`}>{e.status}</span></td>
                                             <td>{e.condition}</td>
                                             <td>{e.description}</td>

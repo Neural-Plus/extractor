@@ -15,6 +15,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ExtractorRouter } from "@/lib/nural-extractor";
 import type { ExtractionResult, ExtractionResponse } from "@/lib/nural-extractor";
+import {
+    extractionResultsToMarkdown,
+    extractionResultsToText,
+    parseOutputFormat,
+} from "@/lib/nural-extractor/output-formatters";
 
 /**
  * Next.js Route Segment Config
@@ -95,6 +100,21 @@ export async function POST(request: NextRequest) {
         // ── Parse multipart form data ──
         const formData = await request.formData();
         const files = formData.getAll("files");
+        const requestedFormat =
+            request.nextUrl.searchParams.get("format") ??
+            (typeof formData.get("format") === "string"
+                ? (formData.get("format") as string)
+                : null);
+        const outputFormat = parseOutputFormat(requestedFormat);
+
+        if (!outputFormat) {
+            return NextResponse.json(
+                {
+                    error: "Invalid output format. Use one of: json, txt, md (or markdown).",
+                },
+                { status: 400 }
+            );
+        }
 
         if (files.length === 0) {
             return NextResponse.json(
@@ -167,6 +187,19 @@ export async function POST(request: NextRequest) {
         });
 
         const response: ExtractionResponse = { results };
+        if (outputFormat === "txt") {
+            return new NextResponse(extractionResultsToText(results), {
+                status: 200,
+                headers: { "Content-Type": "text/plain; charset=utf-8" },
+            });
+        }
+
+        if (outputFormat === "md") {
+            return new NextResponse(extractionResultsToMarkdown(results), {
+                status: 200,
+                headers: { "Content-Type": "text/markdown; charset=utf-8" },
+            });
+        }
 
         return NextResponse.json(response, { status: 200 });
     } catch (err: unknown) {
@@ -188,6 +221,12 @@ export async function GET() {
                 method: "POST",
                 path: "/api/nural/extract",
                 body: "multipart/form-data with field 'files'",
+                outputFormats: ["json", "txt", "md"],
+                formatSelection: {
+                    query: "?format=json|txt|md",
+                    formField: "format=json|txt|md",
+                    default: "json",
+                },
                 supportedTypes: Object.values(EXTENSION_MIME_MAP).filter(
                     (v, i, a) => a.indexOf(v) === i
                 ),

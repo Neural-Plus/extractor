@@ -32,6 +32,11 @@ import type {
   ExtractionResult,
   ExtractedDocument,
 } from "@/lib/nural-extractor";
+import {
+  extractionResultsToMarkdown,
+  extractionResultsToText,
+  parseOutputFormat,
+} from "@/lib/nural-extractor/output-formatters";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -149,6 +154,23 @@ export async function POST(request: NextRequest) {
     // ── Parse form data ──
     const formData = await request.formData();
     const files = formData.getAll("files");
+    const requestedFormat =
+      request.nextUrl.searchParams.get("format") ??
+      (typeof formData.get("format") === "string"
+        ? (formData.get("format") as string)
+        : null);
+    const outputFormat = parseOutputFormat(requestedFormat);
+
+    if (!outputFormat) {
+      return NextResponse.json(
+        {
+          apiVersion: "v1",
+          error:
+            "Invalid output format. Use one of: json, txt, md (or markdown).",
+        },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
 
     if (files.length === 0) {
       return NextResponse.json(
@@ -225,7 +247,29 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    return NextResponse.json(buildResponse(results), {
+    const payload = buildResponse(results);
+
+    if (outputFormat === "txt") {
+      return new NextResponse(extractionResultsToText(results), {
+        status: 200,
+        headers: {
+          ...corsHeaders(),
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      });
+    }
+
+    if (outputFormat === "md") {
+      return new NextResponse(extractionResultsToMarkdown(results), {
+        status: 200,
+        headers: {
+          ...corsHeaders(),
+          "Content-Type": "text/markdown; charset=utf-8",
+        },
+      });
+    }
+
+    return NextResponse.json(payload, {
       status: 200,
       headers: corsHeaders(),
     });
@@ -263,7 +307,13 @@ export async function GET() {
       contentType: "multipart/form-data",
       fieldName: "files",
       description:
-        "Upload one or more files to extract structured text content as JSON.",
+        "Upload one or more files to extract structured text content.",
+      outputFormats: ["json", "txt", "md"],
+      formatSelection: {
+        query: "?format=json|txt|md",
+        formField: "format=json|txt|md",
+        default: "json",
+      },
       limits: {
         maxFileSize: "50 MB",
         maxDuration: "60 seconds",
@@ -279,7 +329,7 @@ export async function GET() {
       ],
       supportedMimeTypes: SUPPORTED_TYPES,
       example: {
-        curl: 'curl -X POST https://neural-extractor.onrender.com/api/v1/extract -F "files=@document.pdf" -F "files=@spreadsheet.xlsx"',
+        curl: 'curl -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=md" -F "files=@document.pdf" -F "files=@spreadsheet.xlsx"',
       },
     },
     { status: 200, headers: corsHeaders() }
