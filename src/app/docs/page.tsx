@@ -575,23 +575,23 @@ print(response.json())`}
 npm run dev`}
                         />
                         <p className="docs-text" style={{ marginTop: 12 }}>
-                            Local base URL: <code>http://localhost:3000</code>
+                            Swap the base URL with <code>http://localhost:3000</code> when testing locally.
                         </p>
 
                         <h3 className="docs-subheading">PowerShell cURL Tests</h3>
                         <CodeBlock
                             language="powershell"
-                            code={`curl.exe -X POST "http://localhost:3000/api/v1/extract" -F "files=@C:\\path\\to\\file.pdf"
-curl.exe -X POST "http://localhost:3000/api/v1/extract?format=txt" -F "files=@C:\\path\\to\\file.pdf"
-curl.exe -X POST "http://localhost:3000/api/v1/extract?format=md" -F "files=@C:\\path\\to\\file.pdf"`}
+                            code={`curl.exe -X POST "https://neural-extractor.onrender.com/api/v1/extract" -F "files=@C:\\path\\to\\file.pdf"
+curl.exe -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=txt" -F "files=@C:\\path\\to\\file.pdf"
+curl.exe -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=md" -F "files=@C:\\path\\to\\file.pdf"`}
                         />
 
                         <h3 className="docs-subheading">Save Output to Local Files</h3>
                         <CodeBlock
                             language="powershell"
-                            code={`curl.exe -X POST "http://localhost:3000/api/v1/extract?format=json" -F "files=@C:\\path\\to\\file.pdf" -o result.json
-curl.exe -X POST "http://localhost:3000/api/v1/extract?format=txt" -F "files=@C:\\path\\to\\file.pdf" -o result.txt
-curl.exe -X POST "http://localhost:3000/api/v1/extract?format=md" -F "files=@C:\\path\\to\\file.pdf" -o result.md`}
+                            code={`curl.exe -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=json" -F "files=@C:\\path\\to\\file.pdf" -o result.json
+curl.exe -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=txt" -F "files=@C:\\path\\to\\file.pdf" -o result.txt
+curl.exe -X POST "https://neural-extractor.onrender.com/api/v1/extract?format=md" -F "files=@C:\\path\\to\\file.pdf" -o result.md`}
                         />
                     </section>
 
