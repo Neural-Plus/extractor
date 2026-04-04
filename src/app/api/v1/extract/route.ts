@@ -279,7 +279,7 @@ export async function GET() {
       ],
       supportedMimeTypes: SUPPORTED_TYPES,
       example: {
-        curl: 'curl -X POST https://neural-extractor.onrender.com/api/v1/extract -F "files=@document.pdf" -F "files=@spreadsheet.xlsx"',
+        curl: 'curl -X POST https://neural-extarctor.netlify.app/api/v1/extract -F "files=@document.pdf" -F "files=@spreadsheet.xlsx"',
       },
     },
     { status: 200, headers: corsHeaders() }

@@ -189,7 +189,7 @@ export default function ApiDocsPage() {
                         <div className="docs-info-cards">
                             <div className="docs-info-card">
                                 <div className="docs-info-label">Base URL</div>
-                                <code className="docs-info-value">https://neural-extractor.onrender.com</code>
+                                <code className="docs-info-value">https://neural-extarctor.netlify.app</code>
                             </div>
                             <div className="docs-info-card">
                                 <div className="docs-info-label">Version</div>
@@ -446,14 +446,14 @@ export default function ApiDocsPage() {
                         <h3 className="docs-subheading">cURL — Single File</h3>
                         <CodeBlock
                             language="bash"
-                            code={`curl -X POST https://neural-extractor.onrender.com/api/v1/extract \\
+                            code={`curl -X POST https://neural-extarctor.netlify.app/api/v1/extract \\
   -F "files=@report.pdf"`}
                         />
 
                         <h3 className="docs-subheading">cURL — Batch Upload</h3>
                         <CodeBlock
                             language="bash"
-                            code={`curl -X POST https://neural-extractor.onrender.com/api/v1/extract \\
+                            code={`curl -X POST https://neural-extarctor.netlify.app/api/v1/extract \\
   -F "files=@report.pdf" \\
   -F "files=@data.xlsx" \\
   -F "files=@notes.docx"`}
@@ -479,7 +479,7 @@ console.log(data.results);`}
                             language="python"
                             code={`import requests
 
-url = "https://neural-extractor.onrender.com/api/v1/extract"
+url = "https://neural-extarctor.netlify.app/api/v1/extract"
 files = [
     ("files", ("report.pdf", open("report.pdf", "rb"), "application/pdf")),
     ("files", ("data.xlsx", open("data.xlsx", "rb"),
@@ -493,7 +493,7 @@ print(response.json())`}
                         <h3 className="docs-subheading">GET — Service Discovery</h3>
                         <CodeBlock
                             language="bash"
-                            code={`curl https://neural-extractor.onrender.com/api/v1/extract`}
+                            code={`curl https://neural-extarctor.netlify.app/api/v1/extract`}
                         />
                         <p className="docs-text" style={{ marginTop: 12 }}>
                             The GET endpoint returns supported formats, limits, and usage info — useful for

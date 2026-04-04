@@ -1,7 +1,7 @@
 # Nural+ Extractor API Documentation
 
 > **Version:** v1  
-> **Base URL:** `https://neural-extractor.onrender.com`
+> **Base URL:** `https://neural-extarctor.netlify.app`
 
 ---
 
@@ -48,14 +48,14 @@ Upload one or more files and receive structured extraction results as JSON.
 **Single file:**
 
 ```bash
-curl -X POST https://neural-extractor.onrender.com/api/v1/extract \
+curl -X POST https://neural-extarctor.netlify.app/api/v1/extract \
   -F "files=@report.pdf"
 ```
 
 **Multiple files (batch):**
 
 ```bash
-curl -X POST https://neural-extractor.onrender.com/api/v1/extract \
+curl -X POST https://neural-extarctor.netlify.app/api/v1/extract \
   -F "files=@report.pdf" \
   -F "files=@data.xlsx" \
   -F "files=@notes.docx"
@@ -64,7 +64,7 @@ curl -X POST https://neural-extractor.onrender.com/api/v1/extract \
 **Save output to file:**
 
 ```bash
-curl -X POST https://neural-extractor.onrender.com/api/v1/extract \
+curl -X POST https://neural-extarctor.netlify.app/api/v1/extract \
   -F "files=@report.pdf" \
   -o result.json
 ```
@@ -75,7 +75,7 @@ curl -X POST https://neural-extractor.onrender.com/api/v1/extract \
 const formData = new FormData();
 formData.append("files", fileInput.files[0]);
 
-const response = await fetch("https://neural-extractor.onrender.com/api/v1/extract", {
+const response = await fetch("https://neural-extarctor.netlify.app/api/v1/extract", {
   method: "POST",
   body: formData,
 });
@@ -89,7 +89,7 @@ console.log(data);
 ```python
 import requests
 
-url = "https://neural-extractor.onrender.com/api/v1/extract"
+url = "https://neural-extarctor.netlify.app/api/v1/extract"
 files = [
     ("files", ("report.pdf", open("report.pdf", "rb"), "application/pdf")),
     ("files", ("data.xlsx", open("data.xlsx", "rb"), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
@@ -289,7 +289,7 @@ Returns endpoint metadata, supported formats, and a usage example. Useful for se
   ],
   "supportedMimeTypes": [ ... ],
   "example": {
-    "curl": "curl -X POST https://neural-extractor.onrender.com/api/v1/extract -F \"files=@document.pdf\""
+    "curl": "curl -X POST https://neural-extarctor.netlify.app/api/v1/extract -F \"files=@document.pdf\""
   }
 }
 ```
